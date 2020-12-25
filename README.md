@@ -8,6 +8,11 @@ GORY
 
 Add a little color to the task
 
+Super simple, just libc as a dependency `gory` is intended to just add a little color to your cli
+type output.
+
+![Display colors](docs/images/colors.png)
+
 ### Quick links
 * [Contribute](#contribute)
   * [Git-Hook](#git-hook)
@@ -39,4 +44,5 @@ any additional terms or conditions.
 ---
 
 ## Backlog <a name="backlog"/></a>
-
+* Support more pre-defined colors like `orange`?
+* Support styles like `underline`?
