@@ -25,24 +25,26 @@ impl Color {
     pub fn enabled() -> bool {
         *private::TERM_COLOR
     }
+}
 
-    /// Convert the color into a terminal escape sequence
-    pub fn escape_seq(&self) -> String {
-        match *self {
-            Color::Red => "31".to_string(),
-            Color::Green => "32".to_string(),
-            Color::Yellow => "33".to_string(),
-            Color::Blue => "34".to_string(),
-            Color::Magenta => "35".to_string(),
-            Color::Cyan => "36".to_string(),
-            Color::White => "37".to_string(),
-        }
+// Write out the color string
+impl std::fmt::Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str(match *self {
+            Color::Red => "31",
+            Color::Green => "32",
+            Color::Yellow => "33",
+            Color::Blue => "34",
+            Color::Magenta => "35",
+            Color::Cyan => "36",
+            Color::White => "37",
+        })
     }
 }
 /// `Colorable` defines a set of simple color functions for a given type
 pub trait Colorable {
-    // Set the color to use
-    fn set_color(self, color: Color) -> ColorString
+    // Set the color to use for the foreground
+    fn set_fg_color(self, color: Color) -> ColorString
     where
         Self: Sized;
 
@@ -56,30 +58,39 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_color(Color::Red)
+        self.set_fg_color(Color::Red)
     }
 }
 
 /// Wrapper around the String type to provide colors and styles.
 #[derive(Clone, Debug)]
 pub struct ColorString {
-    raw: String,
-    color: Option<Color>,
+    val: String,
+    fg_color: Option<Color>,
+}
+impl ColorString {
+    /// Return the escape sequence if one exists else an empty String
+    fn color(&self) -> String {
+        match self.fg_color {
+            Some(c) => c.to_string(),
+            None => String::new(),
+        }
+    }
 }
 
 // Implement Deref to make ColorString behave like String
 impl core::ops::Deref for ColorString {
     type Target = str;
     fn deref(&self) -> &str {
-        &self.raw
+        &self.val
     }
 }
 
 // Implement the Colorable trait for chaining of operations
 impl Colorable for ColorString {
-    // Update the color
-    fn set_color(mut self, color: Color) -> ColorString {
-        self.color = Some(color);
+    // Update the color to use for the foreground
+    fn set_fg_color(mut self, color: Color) -> ColorString {
+        self.fg_color = Some(color);
         self
     }
 
@@ -88,7 +99,7 @@ impl Colorable for ColorString {
     where
         Self: Sized,
     {
-        self.color = None;
+        self.fg_color = None;
         self
     }
 }
@@ -97,9 +108,21 @@ impl Colorable for ColorString {
 impl std::fmt::Display for ColorString {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         // If color is disabled fallback on String's implementation
-        if !Color::enabled() || self.color.is_none() {
-            return <String as std::fmt::Display>::fmt(&self.raw, f);
+        if !Color::enabled() || self.fg_color.is_none() {
+            return <String as std::fmt::Display>::fmt(&self.val, f);
         }
+
+        // Start escape sequence
+        f.write_str("\x1B[")?;
+
+        // Write out foreground color
+        f.write_str(&self.color())?;
+
+        // Close escape sequence
+        f.write_str("m")?;
+
+        // Write out the actual String
+        f.write_str(&self.val)?;
 
         // Ensure the reset escape sequence gets written out regardless of success
         private::ensure(|| f.write_str("\x1B[0m"));
@@ -111,14 +134,14 @@ impl std::fmt::Display for ColorString {
 
 // Implement the Colorable Trait for &str
 impl<'a> Colorable for &'a str {
-    // Set the color
-    fn set_color(self, color: Color) -> ColorString {
+    // Set the color to use for the foreground
+    fn set_fg_color(self, color: Color) -> ColorString {
         ColorString {
             // Copy as owned string
-            raw: String::from(self),
+            val: String::from(self),
 
             // Store the color for the string
-            color: Some(color),
+            fg_color: Some(color),
         }
     }
 
@@ -129,10 +152,10 @@ impl<'a> Colorable for &'a str {
     {
         ColorString {
             // Copy as owned string
-            raw: String::from(self),
+            val: String::from(self),
 
             // Don't set any color
-            color: None,
+            fg_color: None,
         }
     }
 }
