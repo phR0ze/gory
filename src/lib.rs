@@ -2,22 +2,14 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Color {
     // Standard ANSI defined color
-    Black,         // 30
-    Red,           // 31
-    Green,         // 32
-    Yellow,        // 33
-    Blue,          // 34
-    Magenta,       // 35
-    Cyan,          // 36
-    White,         // 37
-    BrightBlack,   // 90
-    BrightRed,     // 91
-    BrightGreen,   // 92
-    BrightYellow,  // 93
-    BrightBlue,    // 94
-    BrightMagenta, // 95
-    BrightCyan,    // 96
-    BrightWhite,   // 97
+    Black,   // 90
+    Red,     // 91
+    Green,   // 92
+    Yellow,  // 93
+    Blue,    // 94
+    Magenta, // 95
+    Cyan,    // 96
+    White,   // 97
 }
 impl Color {
     /// Is color enabled.
@@ -41,22 +33,14 @@ impl Color {
 impl std::fmt::Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         f.write_str(match *self {
-            Color::Black => "30",
-            Color::Red => "31",
-            Color::Green => "32",
-            Color::Yellow => "33",
-            Color::Blue => "34",
-            Color::Magenta => "35",
-            Color::Cyan => "36",
-            Color::White => "37",
-            Color::BrightBlack => "90",
-            Color::BrightRed => "91",
-            Color::BrightGreen => "92",
-            Color::BrightYellow => "93",
-            Color::BrightBlue => "94",
-            Color::BrightMagenta => "95",
-            Color::BrightCyan => "96",
-            Color::BrightWhite => "97",
+            Color::Black => "90",
+            Color::Red => "91",
+            Color::Green => "92",
+            Color::Yellow => "93",
+            Color::Blue => "94",
+            Color::Magenta => "95",
+            Color::Cyan => "96",
+            Color::White => "97",
         })
     }
 }
@@ -64,7 +48,7 @@ impl std::fmt::Display for Color {
 /// `Colorable` defines a set of simple color functions for a given type
 pub trait Colorable {
     // Set the style to use for the foreground
-    fn set_fg_style(self, color: Color, bold: bool) -> ColorString
+    fn set_fg_style(self, color: Color) -> ColorString
     where
         Self: Sized;
 
@@ -79,19 +63,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Black, false)
-    }
-    fn bright_black(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightBlack, false)
-    }
-    fn bold_black(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightBlack, true)
+        self.set_fg_style(Color::Black)
     }
 
     // Red functions
@@ -100,19 +72,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Red, false)
-    }
-    fn bright_red(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightRed, false)
-    }
-    fn bold_red(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::Red, true)
+        self.set_fg_style(Color::Red)
     }
 
     // Green functions
@@ -121,19 +81,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Green, false)
-    }
-    fn bright_green(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightGreen, false)
-    }
-    fn bold_green(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightGreen, true)
+        self.set_fg_style(Color::Green)
     }
 
     // Yellow functions
@@ -142,19 +90,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Yellow, false)
-    }
-    fn bright_yellow(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightYellow, false)
-    }
-    fn bold_yellow(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightYellow, true)
+        self.set_fg_style(Color::Yellow)
     }
 
     // Blue functions
@@ -163,19 +99,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Blue, false)
-    }
-    fn bright_blue(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightBlue, false)
-    }
-    fn bold_blue(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightBlue, true)
+        self.set_fg_style(Color::Blue)
     }
 
     // Magenta functions
@@ -184,19 +108,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Magenta, false)
-    }
-    fn bright_magenta(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightMagenta, false)
-    }
-    fn bold_magenta(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightMagenta, true)
+        self.set_fg_style(Color::Magenta)
     }
 
     // Cyan functions
@@ -205,19 +117,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::Cyan, false)
-    }
-    fn bright_cyan(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightCyan, false)
-    }
-    fn bold_cyan(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightCyan, true)
+        self.set_fg_style(Color::Cyan)
     }
 
     // White functions
@@ -226,19 +126,7 @@ pub trait Colorable {
     where
         Self: Sized,
     {
-        self.set_fg_style(Color::White, false)
-    }
-    fn bright_white(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightWhite, false)
-    }
-    fn bold_white(self) -> ColorString
-    where
-        Self: Sized,
-    {
-        self.set_fg_style(Color::BrightWhite, true)
+        self.set_fg_style(Color::White)
     }
 }
 
@@ -247,7 +135,6 @@ pub trait Colorable {
 pub struct ColorString {
     val: String,
     fg_color: Option<Color>,
-    fg_bold: bool,
 }
 impl ColorString {
     /// Return the escape sequence if one exists else an empty String
@@ -270,9 +157,11 @@ impl core::ops::Deref for ColorString {
 // Implement the Colorable trait for chaining of operations
 impl Colorable for ColorString {
     // Update the color to use for the foreground
-    fn set_fg_style(mut self, color: Color, bold: bool) -> ColorString {
+    fn set_fg_style(mut self, color: Color) -> ColorString
+    where
+        Self: Sized,
+    {
         self.fg_color = Some(color);
-        self.fg_bold = bold;
         self
     }
 
@@ -282,7 +171,6 @@ impl Colorable for ColorString {
         Self: Sized,
     {
         self.fg_color = None;
-        self.fg_bold = false;
         self
     }
 }
@@ -293,7 +181,6 @@ impl Default for ColorString {
         ColorString {
             val: String::default(), // Actual string value
             fg_color: None,         // Foreground color
-            fg_bold: false,         // Foreground color bold
         }
     }
 }
@@ -306,13 +193,14 @@ impl std::fmt::Display for ColorString {
             return <String as std::fmt::Display>::fmt(&self.val, f);
         }
 
+        // Ensure the reset escape sequence gets written out regardless of success
+        private::ensure(|| f.write_str("\x1B[0m"));
+
         // Start escape sequence
         f.write_str("\x1B[")?;
 
-        // Write out foreground style
-        if self.fg_bold {
-            f.write_str("1;")?;
-        }
+        // Always set bold to keep it bright and simple
+        f.write_str("1;")?;
 
         // Write out foreground color
         f.write_str(&self.color())?;
@@ -323,9 +211,6 @@ impl std::fmt::Display for ColorString {
         // Write out the actual String
         f.write_str(&self.val)?;
 
-        // Ensure the reset escape sequence gets written out regardless of success
-        private::ensure(|| f.write_str("\x1B[0m"));
-
         // Write out color strings using terminal escape sequences
         Ok(())
     }
@@ -334,8 +219,11 @@ impl std::fmt::Display for ColorString {
 // Implement the Colorable Trait for &str
 impl<'a> Colorable for &'a str {
     // Set the style to use for the foreground
-    fn set_fg_style(self, color: Color, bold: bool) -> ColorString {
-        ColorString { val: String::from(self), fg_color: Some(color), fg_bold: bold }
+    fn set_fg_style(self, color: Color) -> ColorString
+    where
+        Self: Sized,
+    {
+        ColorString { val: String::from(self), fg_color: Some(color) }
     }
 
     // Clear the color
