@@ -101,9 +101,10 @@ impl std::fmt::Display for ColorString {
             return <String as std::fmt::Display>::fmt(&self.raw, f);
         }
 
+        // Ensure the reset escape sequence gets written out regardless of success
+        private::ensure(|| f.write_str("\x1B[0m"));
+
         // Write out color strings using terminal escape sequences
-        // TODO: use finally pattern here to ensure a reset get written out
-        f.write_str("\x1B[0m")?;
         Ok(())
     }
 }
@@ -140,8 +141,8 @@ impl<'a> Colorable for &'a str {
 // -------------------------------------------------------------------------------------------------
 pub(crate) mod private {
     use lazy_static::*;
-    use std::env;
     use std::ffi::OsStr;
+    use std::{env, fmt};
 
     lazy_static! {
         /// `TERM_COLOR` will be true if the environment is a tty and the
@@ -157,6 +158,22 @@ pub(crate) mod private {
     // Check if the environment has a tty
     pub fn hastty() -> bool {
         unsafe { libc::isatty(libc::STDOUT_FILENO) != 0 }
+    }
+
+    // Ensure the given closure is executed once the surrounding scope closes.
+    // Inspired by Golang's `defer`, Java's finally and Ruby's `ensure`
+    pub fn ensure<T: FnOnce() -> fmt::Result>(f: T) -> impl Drop {
+        Ensure(Some(f))
+    }
+
+    // Ensure uses Rust's object destructor to execute the given closure once
+    // the surrounding scope closes.
+    struct Ensure<T: FnOnce() -> fmt::Result>(Option<T>);
+
+    impl<T: FnOnce() -> fmt::Result> Drop for Ensure<T> {
+        fn drop(&mut self) {
+            self.0.take().map(|f| f());
+        }
     }
 }
 
