@@ -1,4 +1,13 @@
 /// `Color` defines supported color types and provides static functions
+///
+/// ### Examples
+/// ```rust
+/// use gory::*;
+///
+/// print!("{}  ", format!("\\e[1;{}m", Color::Red).red());
+/// print!("{}  ", "red".red());
+/// println!();
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Color {
     // Standard ANSI defined color
@@ -26,6 +35,37 @@ impl Color {
     /// ```
     pub fn enabled() -> bool {
         *private::TERM_COLOR
+    }
+
+    /// Force color to be enable or disabled regardless of attached tty or value of
+    /// `TERM_COLOR` based on the `bool` given.
+    ///
+    /// To return to automatic color control simply call with a value of `None`.
+    ///
+    /// ### Examples
+    /// ```rust
+    /// use gory::*;
+    ///
+    /// Color::force(Some(true));
+    /// Color::force(Some(false));
+    /// Color::force(None);
+    /// ```
+    pub fn force(val: Option<bool>) {
+        *private::FORCE_COLOR.lock().unwrap() = val;
+    }
+
+    // Internal functions to check the status of the force value
+    pub(crate) fn force_on() -> bool {
+        match *private::FORCE_COLOR.lock().unwrap() {
+            Some(val) => val,
+            None => false,
+        }
+    }
+    pub(crate) fn force_off() -> bool {
+        match *private::FORCE_COLOR.lock().unwrap() {
+            Some(val) => !val,
+            None => false,
+        }
     }
 }
 
@@ -131,7 +171,7 @@ pub trait Colorable {
 }
 
 /// Wrapper around the String type to provide colors and styles.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ColorString {
     val: String,
     fg_color: Option<Color>,
@@ -189,7 +229,7 @@ impl Default for ColorString {
 impl std::fmt::Display for ColorString {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         // If color is disabled fallback on String's implementation
-        if !Color::enabled() || self.fg_color.is_none() {
+        if !Color::force_on() && Color::force_off() || !Color::enabled() || self.fg_color.is_none() {
             return <String as std::fmt::Display>::fmt(&self.val, f);
         }
 
@@ -240,12 +280,16 @@ impl<'a> Colorable for &'a str {
 pub(crate) mod private {
     use lazy_static::*;
     use std::ffi::OsStr;
+    use std::sync::Mutex;
     use std::{env, fmt};
 
     lazy_static! {
         /// `TERM_COLOR` will be true if the environment is a tty and the
         /// environment variable `TERM_COLOR` is not set to something falsy.
         pub static ref TERM_COLOR: bool = hastty() && flag_default("TERM_COLOR", true);
+
+        // Force color to be enabled or disabled based on this additional flag
+        pub static ref FORCE_COLOR: Mutex<Option<bool>> = Mutex::new(None);
     }
 
     // Get an environment flag value with a default
@@ -284,5 +328,33 @@ mod tests {
     #[test]
     fn test_color_enabled() {
         assert!(Color::enabled() || !Color::enabled());
+    }
+
+    #[test]
+    fn test_colors() {
+        Color::force(Some(true));
+        assert_eq!("\u{1b}[0m\u{1b}[1;90m", "".black().to_string());
+        assert_eq!(String::new(), *String::new().black());
+        assert_eq!("\u{1b}[0m\u{1b}[1;91m", "".red().to_string());
+        assert_eq!("", "".red().clear().to_string());
+        assert_eq!("", "".clear().to_string());
+        assert_eq!("\u{1b}[0m\u{1b}[1;92m", "".green().to_string());
+        assert_eq!("\u{1b}[0m\u{1b}[1;93m", "".yellow().to_string());
+        assert_eq!("\u{1b}[0m\u{1b}[1;94m", "".blue().to_string());
+        assert_eq!("\u{1b}[0m\u{1b}[1;95m", "".magenta().to_string());
+        assert_eq!("\u{1b}[0m\u{1b}[1;96m", "".cyan().to_string());
+        assert_eq!("\u{1b}[0m\u{1b}[1;97m", "".white().to_string());
+
+        Color::force(Some(false));
+        assert_eq!("", "".black().to_string());
+        assert_eq!("", "".red().to_string());
+        assert_eq!("", "".green().to_string());
+        assert_eq!("", "".yellow().to_string());
+        assert_eq!("", "".blue().to_string());
+        assert_eq!("", "".magenta().to_string());
+        assert_eq!("", "".cyan().to_string());
+        assert_eq!("", "".white().to_string());
+
+        Color::force(None);
     }
 }
