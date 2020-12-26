@@ -43,7 +43,7 @@ impl Color {
     /// To return to automatic color control simply call with a value of `None`.
     ///
     /// ### Examples
-    /// ```rust
+    /// ```rust,ignore
     /// use gory::*;
     ///
     /// Color::force(Some(true));
@@ -229,7 +229,7 @@ impl Default for ColorString {
 impl std::fmt::Display for ColorString {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         // If color is disabled fallback on String's implementation
-        if !Color::force_on() && Color::force_off() || !Color::enabled() || self.fg_color.is_none() {
+        if self.fg_color.is_none() || Color::force_off() || (!Color::enabled() && !Color::force_on()) {
             return <String as std::fmt::Display>::fmt(&self.val, f);
         }
 
@@ -333,6 +333,8 @@ mod tests {
     #[test]
     fn test_colors() {
         Color::force(Some(true));
+        assert!(Color::force_on());
+        assert!(!Color::force_off());
         assert_eq!("\u{1b}[0m\u{1b}[1;90m", "".black().to_string());
         assert_eq!(String::new(), *String::new().black());
         assert_eq!("\u{1b}[0m\u{1b}[1;91m", "".red().to_string());
@@ -346,6 +348,8 @@ mod tests {
         assert_eq!("\u{1b}[0m\u{1b}[1;97m", "".white().to_string());
 
         Color::force(Some(false));
+        assert!(Color::force_off());
+        assert!(!Color::force_on());
         assert_eq!("", "".black().to_string());
         assert_eq!("", "".red().to_string());
         assert_eq!("", "".green().to_string());
