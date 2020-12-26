@@ -169,22 +169,7 @@ pub trait Colorable {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ColorString {
     inner: String,
-    fg_color: Option<Color>,
-}
-impl ColorString {
-    /// Return the escape sequence if one exists else an empty String
-    fn color(&self) -> String {
-        match self.fg_color {
-            Some(c) => c.to_string(),
-            None => String::new(),
-        }
-    }
-
-    /// Clear the color styling from the String
-    #[allow(dead_code)]
-    fn clear(&self) -> String {
-        self.inner.clone()
-    }
+    fg_color: Color,
 }
 
 // Implement Deref to make ColorString behave like String
@@ -197,23 +182,12 @@ impl core::ops::Deref for ColorString {
 
 // Implement the Colorable trait for chaining of operations
 impl Colorable for ColorString {
-    // Update the color to use for the foreground
     fn set_fg_style(mut self, color: Color) -> ColorString
     where
         Self: Sized,
     {
-        self.fg_color = Some(color);
+        self.fg_color = color;
         self
-    }
-}
-
-// Implement the Default trait
-impl Default for ColorString {
-    fn default() -> Self {
-        ColorString {
-            inner: String::default(), // Actual string value
-            fg_color: None,           // Foreground color
-        }
     }
 }
 
@@ -221,7 +195,7 @@ impl Default for ColorString {
 impl std::fmt::Display for ColorString {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         // If color is disabled fallback on String's implementation
-        if self.fg_color.is_none() || Color::force_off() || (!Color::enabled() && !Color::force_on()) {
+        if Color::force_off() || (!Color::enabled() && !Color::force_on()) {
             return <String as std::fmt::Display>::fmt(&self.inner, f);
         }
 
@@ -238,7 +212,7 @@ impl std::fmt::Display for ColorString {
         d.borrow_mut().write_str("1;")?;
 
         // Write out foreground color
-        d.borrow_mut().write_str(&self.color())?;
+        d.borrow_mut().write_str(&self.fg_color.to_string())?;
 
         // Close escape sequence
         d.borrow_mut().write_str("m")?;
@@ -258,7 +232,7 @@ impl<'a> Colorable for &'a str {
     where
         Self: Sized,
     {
-        ColorString { inner: String::from(self), fg_color: Some(color) }
+        ColorString { inner: String::from(self), fg_color: color }
     }
 }
 
@@ -326,17 +300,15 @@ mod tests {
         assert!(Color::force_on());
         assert!(!Color::force_off());
 
-        // Clear color
+        // Deref color
         let foo = String::from("foo").red();
-        assert_eq!("\u{1b}[1;91m\u{1b}[0m", "".red().to_string());
-        assert_eq!(String::from("foo"), foo.clear());
-
-        // Deref
         assert_eq!(String::from("foo"), *foo);
 
         // Update color
         assert_eq!("\u{1b}[1;91m\u{1b}[0m", "".black().red().to_string());
 
+        // List all colors
+        assert_eq!("\u{1b}[1;91m\u{1b}[0m", "".red().to_string());
         assert_eq!("\u{1b}[1;90m\u{1b}[0m", "".black().to_string());
         assert_eq!("\u{1b}[1;92m\u{1b}[0m", "".green().to_string());
         assert_eq!("\u{1b}[1;93m\u{1b}[0m", "".yellow().to_string());

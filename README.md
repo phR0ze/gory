@@ -12,6 +12,7 @@ Super simple with minimal dependencies; `gory` is intended to just add a little 
 
 ### Quick links
 * [Usage](#usage)
+  * [Get String](#get-string)
   * [Control use](#control-use)
 * [Contribute](#contribute)
   * [Git-Hook](#git-hook)
@@ -40,6 +41,18 @@ Super simple with minimal dependencies; `gory` is intended to just add a little 
    }
    ```
 
+### Get String <a name="get-string"/></a>
+To get the wrapped `String` out of a `ColorString` just dereference it.
+
+```rust
+use gory::*;
+
+fn main() {
+  let cstr = String::from("foo").red();
+  assert!(String::from("foo"), *cstr);
+}
+```
+
 ### Control use <a name="control-use"/></a>
 Color output can be enabled or disabled using the `TERM_COLOR` varible.
 
@@ -56,9 +69,11 @@ to force off and `None` to return to automatic control.
 ```rust
 use gory::*;
 
-Color::force(Some(true));
-Color::force(Some(false));
-Color::force(None);
+fn main() {
+  Color::force(Some(true));
+  Color::force(Some(false));
+  Color::force(None);
+}
 ```
 
 ## Contribute <a name="Contribute"/></a>
