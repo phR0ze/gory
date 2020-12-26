@@ -1,3 +1,10 @@
+/// Environment variable name for enabling/disabling color
+///
+/// Whan a tty is attached to the environment and this environment variable is
+/// either unset or truthy color will be used. Likewise if a tty exists and this
+/// variable is set and falsy color will not be used.
+pub const TERM_COLOR: &str = "TERM_COLOR";
+
 /// `Color` defines supported color types and provides static functions
 ///
 /// ### Examples
@@ -34,7 +41,7 @@ impl Color {
     /// println!("{:?}", Color::enabled());
     /// ```
     pub fn enabled() -> bool {
-        *private::TERM_COLOR
+        *private::TERM_COLOR_FLAG
     }
 
     /// Force color to be enable or disabled regardless of attached tty or value of
@@ -245,9 +252,9 @@ pub(crate) mod private {
     use std::{env, fmt};
 
     lazy_static! {
-        /// `TERM_COLOR` will be true if the environment is a tty and the
+        /// `TERM_COLOR_FLAG` will be true if the environment is a tty and the
         /// environment variable `TERM_COLOR` is not set to something falsy.
-        pub static ref TERM_COLOR: bool = hastty() && flag_default("TERM_COLOR", true);
+        pub static ref TERM_COLOR_FLAG: bool = hastty() && flag_default(super::TERM_COLOR, true);
 
         // Force color to be enabled or disabled based on this additional flag
         pub static ref FORCE_COLOR: Mutex<Option<bool>> = Mutex::new(None);
