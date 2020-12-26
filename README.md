@@ -5,7 +5,7 @@
 [![crates.io](https://img.shields.io/crates/v/gory.svg)](https://crates.io/crates/gory)
 [![rust-version](https://img.shields.io/badge/rust-latest%20stable-blue.svg)](https://github.com/rust-lang/rust/releases)
 
-Super simple, just `libc` as a dependency; `gory` is intended to just add a little color to your task
+Super simple with minimal dependencies; `gory` is intended to just add a little color to your task
 
 **Example:**  
 ![Display colors](docs/images/colors.png)
