@@ -7,6 +7,11 @@
 
 ***Add a little color to the task***
 
+***gory*** was created to provide super simple color usage for Linux terminals in a well documented
+way. `gory` will automatically detect the abscence of a TTY and disable color output. However color
+can also be disabled manually via the env variable `TERM_COLOR` or forced on or off at runtime as
+needed.
+
 **Example:**  
 ![Display colors](docs/images/colors.png)
 
@@ -107,6 +112,7 @@ any additional terms or conditions.
 ---
 
 ## Backlog <a name="backlog"/></a>
+* Improve documentation
 * Support more pre-defined colors like `orange`?
 * Support styles like `underline`?
 
