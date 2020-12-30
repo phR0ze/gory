@@ -3,7 +3,7 @@
 [![build](https://github.com/phR0ze/gory/workflows/build/badge.svg?branch=main)](https://github.com/phR0ze/gory/actions)
 [![codecov](https://codecov.io/gh/phR0ze/gory/branch/main/graph/badge.svg?token=3KnXWj0qTw)](https://codecov.io/gh/phR0ze/gory)
 [![crates.io](https://img.shields.io/crates/v/gory.svg)](https://crates.io/crates/gory)
-[![rust-version](https://img.shields.io/badge/rust-latest%20stable-blue.svg)](https://github.com/rust-lang/rust/releases)
+[![Minimum rustc](https://img.shields.io/badge/rustc-1.30+-lightgray.svg)](https://github.com/phR0ze/gory#rustc-requirements)
 
 ***Add a little color to the task***
 
@@ -12,6 +12,7 @@
 
 ### Quick links
 * [Usage](#usage)
+  * [Rustc requirments](#rustc-requirements)
   * [Get String](#get-string)
   * [Control use](#control-use)
 * [Contribute](#contribute)
@@ -19,8 +20,14 @@
 * [License](#license)
   * [Contribution](#contribution)
 * [Backlog](#backlog)
+* [Changelog](#changelog)
 
 ## Usage <a name="usage"/></a>
+
+#### Requires rustc >= 1.30 <a name="rustc-requirements"/></a>
+This minimum rustc requirement is driven by the enhancemnts made to [Rust's `std::error::Error`
+handling improvements](https://doc.rust-lang.org/std/error/trait.Error.html#method.source)
+
 1. Import `gory` into your project via `Cargo.toml`
    ```toml
    [dependencies]
@@ -102,3 +109,7 @@ any additional terms or conditions.
 ## Backlog <a name="backlog"/></a>
 * Support more pre-defined colors like `orange`?
 * Support styles like `underline`?
+
+## Changelog <a name="changelog"/></a>
+* 12/30/2020
+  * Corrected the minimum rustc badge and added a description
