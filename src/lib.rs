@@ -16,7 +16,8 @@ pub const TERM_COLOR: &str = "TERM_COLOR";
 /// println!();
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Color {
+pub enum Color
+{
     // Standard ANSI defined color
     Black,   // 90
     Red,     // 91
@@ -27,7 +28,8 @@ pub enum Color {
     Cyan,    // 96
     White,   // 97
 }
-impl Color {
+impl Color
+{
     /// Is color enabled.
     ///
     /// Determines if the environment has a tty attached and the `TERM_COLOR` environment
@@ -40,7 +42,8 @@ impl Color {
     ///
     /// println!("{:?}", Color::enabled());
     /// ```
-    pub fn enabled() -> bool {
+    pub fn enabled() -> bool
+    {
         *private::TERM_COLOR_FLAG
     }
 
@@ -57,18 +60,22 @@ impl Color {
     /// Color::force(Some(false));
     /// Color::force(None);
     /// ```
-    pub fn force(val: Option<bool>) {
+    pub fn force(val: Option<bool>)
+    {
         *private::FORCE_COLOR.lock().unwrap() = val;
     }
 
     // Internal functions to check the status of the force value
-    pub(crate) fn force_on() -> bool {
+    pub(crate) fn force_on() -> bool
+    {
         match *private::FORCE_COLOR.lock().unwrap() {
             Some(val) => val,
             None => false,
         }
     }
-    pub(crate) fn force_off() -> bool {
+
+    pub(crate) fn force_off() -> bool
+    {
         match *private::FORCE_COLOR.lock().unwrap() {
             Some(val) => !val,
             None => false,
@@ -77,8 +84,10 @@ impl Color {
 }
 
 // Write out the color string
-impl std::fmt::Display for Color {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl std::fmt::Display for Color
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result
+    {
         f.write_str(match *self {
             Color::Black => "90",
             Color::Red => "91",
@@ -93,7 +102,8 @@ impl std::fmt::Display for Color {
 }
 
 /// `Colorable` defines a set of simple color functions for a given type
-pub trait Colorable {
+pub trait Colorable
+{
     // Set the style to use for the foreground
     fn set_fg_style(self, color: Color) -> ColorString
     where
@@ -174,21 +184,26 @@ pub trait Colorable {
 
 /// Wrapper around the String type to provide colors and styles.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ColorString {
+pub struct ColorString
+{
     inner: String,
     fg_color: Color,
 }
 
 // Implement Deref to make ColorString behave like String
-impl core::ops::Deref for ColorString {
+impl core::ops::Deref for ColorString
+{
     type Target = str;
-    fn deref(&self) -> &str {
+
+    fn deref(&self) -> &str
+    {
         &self.inner
     }
 }
 
 // Implement the Colorable trait for chaining of operations
-impl Colorable for ColorString {
+impl Colorable for ColorString
+{
     fn set_fg_style(mut self, color: Color) -> ColorString
     where
         Self: Sized,
@@ -199,8 +214,10 @@ impl Colorable for ColorString {
 }
 
 // Write out the color string
-impl std::fmt::Display for ColorString {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl std::fmt::Display for ColorString
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result
+    {
         // If color is disabled fallback on String's implementation
         if Color::force_off() || (!Color::enabled() && !Color::force_on()) {
             return <String as std::fmt::Display>::fmt(&self.inner, f);
@@ -233,7 +250,8 @@ impl std::fmt::Display for ColorString {
 }
 
 // Implement the Colorable Trait for &str
-impl<'a> Colorable for &'a str {
+impl<'a> Colorable for &'a str
+{
     // Set the style to use for the foreground
     fn set_fg_style(self, color: Color) -> ColorString
     where
@@ -245,11 +263,10 @@ impl<'a> Colorable for &'a str {
 
 // Private implementation
 // -------------------------------------------------------------------------------------------------
-pub(crate) mod private {
+pub(crate) mod private
+{
     use lazy_static::*;
-    use std::ffi::OsStr;
-    use std::sync::Mutex;
-    use std::{env, fmt};
+    use std::{env, ffi::OsStr, fmt, sync::Mutex};
 
     lazy_static! {
         /// `TERM_COLOR_FLAG` will be true if the environment is a tty and the
@@ -261,18 +278,24 @@ pub(crate) mod private {
     }
 
     // Get an environment flag value with a default
-    pub fn flag_default<K: AsRef<OsStr>>(key: K, default: bool) -> bool {
+    pub fn flag_default<K: AsRef<OsStr>>(key: K, default: bool) -> bool
+    {
         !matches!(env::var(key).unwrap_or_else(|_| default.to_string()).to_lowercase().as_str(), "false" | "0")
     }
 
     // Check if the environment has a tty
-    pub fn hastty() -> bool {
-        unsafe { libc::isatty(libc::STDOUT_FILENO) != 0 }
+    pub fn hastty() -> bool
+    {
+        unsafe
+        {
+            libc::isatty(libc::STDOUT_FILENO) != 0
+        }
     }
 
     // Ensure the given closure is executed once the surrounding scope closes.
     // Inspired by Golang's `defer`, Java's finally and Ruby's `ensure`
-    pub fn ensure<T: FnOnce() -> fmt::Result>(f: T) -> impl Drop {
+    pub fn ensure<T: FnOnce() -> fmt::Result>(f: T) -> impl Drop
+    {
         Ensure(Some(f))
     }
 
@@ -280,8 +303,10 @@ pub(crate) mod private {
     // the surrounding scope closes.
     struct Ensure<T: FnOnce() -> fmt::Result>(Option<T>);
 
-    impl<T: FnOnce() -> fmt::Result> Drop for Ensure<T> {
-        fn drop(&mut self) {
+    impl<T: FnOnce() -> fmt::Result> Drop for Ensure<T>
+    {
+        fn drop(&mut self)
+        {
             self.0.take().map(|f| f());
         }
     }
@@ -290,16 +315,19 @@ pub(crate) mod private {
 // Unit tests
 // -------------------------------------------------------------------------------------------------
 #[cfg(test)]
-mod tests {
+mod tests
+{
     use super::*;
 
     #[test]
-    fn test_color_enabled() {
+    fn test_color_enabled()
+    {
         assert!(Color::enabled() || !Color::enabled());
     }
 
     #[test]
-    fn test_colors() {
+    fn test_colors()
+    {
         // Force color
         assert!(!Color::force_on());
         assert!(!Color::force_off());

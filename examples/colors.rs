@@ -1,6 +1,7 @@
 use gory::*;
 
-fn main() {
+fn main()
+{
     print!("{}  ", format!("\\e[1;{}m", Color::Black).black());
     print!("{}  ", format!("\\e[1;{}m", Color::Red).red());
     print!("{}  ", format!("\\e[1;{}m", Color::Green).green());
